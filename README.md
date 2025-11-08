@@ -1,16 +1,16 @@
 ## Hi there 👋
 
-<!--
-**WangZiming-dev/WangZiming-dev** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+I'm a student, and I'm ten years old.😊
+I'm new to Github, so I want to learn more about Github.😙
 
-Here are some ideas to get you started:
+## About this Library ❤️
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+This is my personal library.
+I will share more files about coding, like Python files, HTML files and so on!
+If I don't do well, please bear with me!
+
+## About me 😁
+
+My name is WangZiming, and I like coding!
+My QQ number is 3867673887.
+If you want to know more about me, please be my network friend!
