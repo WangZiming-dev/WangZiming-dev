@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8bit OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#000080',
+                        secondary: '#C0C0C0',
+                        accent: '#FF0000',
+                        text: '#000000',
+                        'window-bg': '#C0C0C0',
+                        'title-bar': '#000080',
+                        'desktop-bg': '#008080',
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace', 'system-ui'],
+                        retro: ['"VT323"', 'monospace', 'system-ui']
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .pixel-border {
+                border-width: 2px;
+                border-style: solid;
+                border-top-color: #ffffff;
+                border-left-color: #ffffff;
+                border-right-color: #000000;
+                border-bottom-color: #000000;
+            }
+            .pixel-border-inset {
+                border-width: 2px;
+                border-style: solid;
+                border-top-color: #000000;
+                border-left-color: #000000;
+                border-right-color: #ffffff;
+                border-bottom-color: #ffffff;
+            }
+            .title-bar {
+                background-color: theme('colors.title-bar');
+                color: white;
+                padding: 2px 4px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+            }
+            .window-content {
+                padding: 4px;
+                background-color: theme('colors.window-bg');
+                height: calc(100% - 20px);
+                overflow: auto;
+            }
+            .icon-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, 64px);
+                gap: 8px;
+                padding: 8px;
+            }
+            .desktop-icon {
+                width: 64px;
+                height: 64px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 11px;
+                text-align: center;
+                cursor: pointer;
+                padding: 4px;
+            }
+            .desktop-icon:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            .taskbar {
+                height: 32px;
+                background-color: theme('colors.secondary');
+                border-top: 2px solid white;
+                display: flex;
+                align-items: center;
+                padding: 0 4px;
+            }
+            .start-button {
+                padding: 0 8px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-weight: bold;
+                margin-right: 8px;
+            }
+            .taskbar-item {
+                height: 24px;
+                padding: 0 8px;
+                margin-right: 4px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 12px;
+            }
+            .menu-item {
+                padding: 2px 8px;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .menu-item:hover {
+                background-color: theme('colors.primary');
+                color: white;
+            }
+            .terminal-output {
+                font-family: 'VT323', monospace;
+                font-size: 16px;
+                white-space: pre;
+                line-height: 1.2;
+            }
+            .terminal-input {
+                font-family: 'VT323', monospace;
+                font-size: 16px;
+                background: transparent;
+                border: none;
+                outline: none;
+                width: calc(100% - 20px);
+            }
+        }
+    </style>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body class="bg-desktop-bg overflow-hidden h-screen flex flex-col">
+    <!-- 桌面 -->
+    <div id="desktop" class="flex-grow relative overflow-hidden">
+        <!-- 桌面图标 -->
+        <div class="icon-grid mt-8 ml-8">
+            <div class="desktop-icon" onclick="openWindow('my-computer')">
+                <i class="fa fa-desktop text-2xl mb-1"></i>
+                <span>我的电脑</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('terminal')">
+                <i class="fa fa-terminal text-2xl mb-1"></i>
+                <span>命令提示符</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('notepad')">
+                <i class="fa fa-file-text-o text-2xl mb-1"></i>
+                <span>记事本</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('calculator')">
+                <i class="fa fa-calculator text-2xl mb-1"></i>
+                <span>计算器</span>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('paint')">
+                <i class="fa fa-paint-brush text-2xl mb-1"></i>
+                <span>画图</span>
+            </div>
+        </div>
+        
+        <!-- 窗口容器 -->
+        <div id="windows-container" class="absolute inset-0 pointer-events-none">
+            <!-- 我的电脑窗口 -->
+            <div id="my-computer" class="window absolute hidden pixel-border w-[640px] h-[480px] left-[100px] top-[100px] pointer-events-auto z-10">
+                <div class="title-bar" onmousedown="startDrag(event, 'my-computer')">
+                    <span>我的电脑</span>
+                    <div class="flex gap-1">
+                        <button onclick="minimizeWindow('my-computer')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">_</button>
+                        <button onclick="closeWindow('my-computer')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">X</button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="mb-4">
+                        <div class="pixel-border-inset p-2 bg-secondary mb-4">
+                            <div class="flex gap-2 mb-2">
+                                <button class="pixel-border px-2 py-1 text-sm">文件(F)</button>
+                                <button class="pixel-border px-2 py-1 text-sm">编辑(E)</button>
+                                <button class="pixel-border px-2 py-1 text-sm">查看(V)</button>
+                                <button class="pixel-border px-2 py-1 text-sm">帮助(H)</button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="desktop-icon">
+                                <i class="fa fa-hard-drive text-2xl mb-1"></i>
+                                <span>C: 本地磁盘</span>
+                            </div>
+                            <div class="desktop-icon">
+                                <i class="fa fa-hard-drive text-2xl mb-1"></i>
+                                <span>D: 数据盘</span>
+                            </div>
+                            <div class="desktop-icon">
+                                <i class="fa fa-floppy-o text-2xl mb-1"></i>
+                                <span>A: 软盘</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 text-sm">
+                            <p>计算机: 8BIT-PC</p>
+                            <p>操作系统: 8bit OS v1.0</p>
+                            <p>内存: 64KB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 命令提示符窗口 -->
+            <div id="terminal" class="window absolute hidden pixel-border w-[640px] h-[400px] left-[200px] top-[150px] pointer-events-auto z-10">
+                <div class="title-bar" onmousedown="startDrag(event, 'terminal')">
+                    <span>命令提示符</span>
+                    <div class="flex gap-1">
+                        <button onclick="minimizeWindow('terminal')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">_</button>
+                        <button onclick="closeWindow('terminal')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">X</button>
+                    </div>
+                </div>
+                <div class="window-content bg-black text-green-400 p-2">
+                    <div id="terminal-output" class="terminal-output">
+                        8bit OS 命令提示符<br>
+                        C:\> 
+                    </div>
+                    <div class="flex">
+                        <span class="terminal-output">C:\></span>
+                        <input type="text" id="terminal-input" class="terminal-input text-green-400" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 记事本窗口 -->
+            <div id="notepad" class="window absolute hidden pixel-border w-[600px] h-[400px] left-[300px] top-[200px] pointer-events-auto z-10">
+                <div class="title-bar" onmousedown="startDrag(event, 'notepad')">
+                    <span>记事本 - 无标题</span>
+                    <div class="flex gap-1">
+                        <button onclick="minimizeWindow('notepad')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">_</button>
+                        <button onclick="closeWindow('notepad')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">X</button>
+                    </div>
+                </div>
+                <div class="window-content p-0">
+                    <div class="pixel-border-inset p-1 bg-secondary mb-0">
+                        <div class="flex gap-2">
+                            <button class="pixel-border px-2 py-0 text-sm">文件(F)</button>
+                            <button class="pixel-border px-2 py-0 text-sm">编辑(E)</button>
+                            <button class="pixel-border px-2 py-0 text-sm">帮助(H)</button>
+                        </div>
+                    </div>
+                    <textarea class="w-full h-[calc(100%-30px)] p-2 bg-white border-0 focus:ring-0" style="font-family: 'Courier New', monospace; resize: none;" placeholder="在这里输入文字..."></textarea>
+                </div>
+            </div>
+            
+            <!-- 计算器窗口 -->
+            <div id="calculator" class="window absolute hidden pixel-border w-[300px] h-[360px] left-[400px] top-[100px] pointer-events-auto z-10">
+                <div class="title-bar" onmousedown="startDrag(event, 'calculator')">
+                    <span>计算器</span>
+                    <div class="flex gap-1">
+                        <button onclick="minimizeWindow('calculator')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">_</button>
+                        <button onclick="closeWindow('calculator')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">X</button>
+                    </div>
+                </div>
+                <div class="window-content p-4">
+                    <div class="pixel-border-inset mb-4 bg-white h-12 flex items-center justify-end p-2 text-xl font-mono">
+                        <span id="calc-display">0</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button class="pixel-border h-10 bg-gray-200" onclick="calcClear()">C</button>
+                        <button class="pixel-border h-10 bg-gray-200" onclick="calcOperator('+/-')">+/-</button>
+                        <button class="pixel-border h-10 bg-gray-200" onclick="calcOperator('%')">%</button>
+                        <button class="pixel-border h-10 bg-red-200" onclick="calcOperator('/')">/</button>
+                        
+                        <button class="pixel-border h-10" onclick="calcNumber(7)">7</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(8)">8</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(9)">9</button>
+                        <button class="pixel-border h-10 bg-red-200" onclick="calcOperator('*')">*</button>
+                        
+                        <button class="pixel-border h-10" onclick="calcNumber(4)">4</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(5)">5</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(6)">6</button>
+                        <button class="pixel-border h-10 bg-red-200" onclick="calcOperator('-')">-</button>
+                        
+                        <button class="pixel-border h-10" onclick="calcNumber(1)">1</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(2)">2</button>
+                        <button class="pixel-border h-10" onclick="calcNumber(3)">3</button>
+                        <button class="pixel-border h-10 bg-red-200" onclick="calcOperator('+')">+</button>
+                        
+                        <button class="pixel-border h-10" onclick="calcNumber(0)">0</button>
+                        <button class="pixel-border h-10" onclick="calcDot()">.</button>
+                        <button class="pixel-border h-10 col-span-2 bg-green-200" onclick="calcEquals()">=</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 画图窗口 -->
+            <div id="paint" class="window absolute hidden pixel-border w-[600px] h-[500px] left-[150px] top-[100px] pointer-events-auto z-10">
+                <div class="title-bar" onmousedown="startDrag(event, 'paint')">
+                    <span>画图</span>
+                    <div class="flex gap-1">
+                        <button onclick="minimizeWindow('paint')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">_</button>
+                        <button onclick="closeWindow('paint')" class="pixel-border-inset w-6 h-6 flex items-center justify-center text-xs">X</button>
+                    </div>
+                </div>
+                <div class="window-content p-0">
+                    <div class="pixel-border-inset p-1 bg-secondary mb-0">
+                        <div class="flex gap-2 flex-wrap">
+                            <button class="pixel-border px-2 py-0 text-sm">文件(F)</button>
+                            <button class="pixel-border px-2 py-0 text-sm">编辑(E)</button>
+                            <button class="pixel-border px-2 py-0 text-sm">查看(V)</button>
+                            <button class="pixel-border px-2 py-0 text-sm">帮助(H)</button>
+                            
+                            <div class="ml-4 flex gap-1">
+                                <button class="pixel-border w-6 h-6 bg-black" onclick="setDrawColor('black')"></button>
+                                <button class="pixel-border w-6 h-6 bg-red" onclick="setDrawColor('red')"></button>
+                                <button class="pixel-border w-6 h-6 bg-blue" onclick="setDrawColor('blue')"></button>
+                                <button class="pixel-border w-6 h-6 bg-green" onclick="setDrawColor('green')"></button>
+                                <button class="pixel-border w-6 h-6 bg-yellow" onclick="setDrawColor('yellow')"></button>
+                                <button class="pixel-border w-6 h-6 bg-white pixel-border-inset" onclick="setDrawColor('white')"></button>
+                            </div>
+                            
+                            <div class="flex gap-1">
+                                <button class="pixel-border px-2 py-0 text-sm" onclick="setDrawTool('pen')">铅笔</button>
+                                <button class="pixel-border px-2 py-0 text-sm" onclick="setDrawTool('line')">直线</button>
+                                <button class="pixel-border px-2 py-0 text-sm" onclick="setDrawTool('rect')">矩形</button>
+                                <button class="pixel-border px-2 py-0 text-sm" onclick="clearCanvas()">清除</button>
+                            </div>
+                        </div>
+                    </div>
+                    <canvas id="paint-canvas" class="w-full h-[calc(100%-30px)] bg-white" width="592" height="448"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 任务栏 -->
+    <div class="taskbar">
+        <div id="start-button" class="start-button pixel-border flex items-center" onclick="toggleStartMenu()">
+            <i class="fa fa-windows text-accent"></i>
+            <span>开始</span>
+        </div>
+        
+        <div id="taskbar-items" class="flex overflow-hidden">
+            <!-- 任务栏项目会动态添加 -->
+        </div>
+        
+        <div class="ml-auto flex items-center gap-2">
+            <div class="pixel-border-inset px-2 py-1 text-sm">
+                <span id="system-time">00:00</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 开始菜单 -->
+    <div id="start-menu" class="absolute bottom-10 left-4 pixel-border bg-secondary w-64 hidden z-50">
+        <div class="p-2">
+            <div class="menu-item">
+                <i class="fa fa-programming"></i>
+                <span>程序</span>
+            </div>
+            <div class="menu-item" onclick="openWindow('my-computer')">
+                <i class="fa fa-desktop"></i>
+                <span>我的电脑</span>
+            </div>
+            <div class="menu-item" onclick="openWindow('terminal')">
+                <i class="fa fa-terminal"></i>
+                <span>命令提示符</span>
+            </div>
+            <div class="menu-item" onclick="openWindow('notepad')">
+                <i class="fa fa-file-text-o"></i>
+                <span>记事本</span>
+            </div>
+            <div class="menu-item" onclick="openWindow('calculator')">
+                <i class="fa fa-calculator"></i>
+                <span>计算器</span>
+            </div>
+            <div class="menu-item" onclick="openWindow('paint')">
+                <i class="fa fa-paint-brush"></i>
+                <span>画图</span>
+            </div>
+            <div class="border-t border-gray-500 my-1"></div>
+            <div class="menu-item">
+                <i class="fa fa-question-circle"></i>
+                <span>帮助</span>
+            </div>
+            <div class="menu-item">
+                <i class="fa fa-cog"></i>
+                <span>设置</span>
+            </div>
+            <div class="border-t border-gray-500 my-1"></div>
+            <div class="menu-item text-red-600">
+                <i class="fa fa-power-off"></i>
+                <span>关闭计算机</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 窗口管理
+        let activeWindow = null;
+        let dragOffset = { x: 0, y: 0 };
+        let zIndex = 10;
+        
+        // 打开窗口
+        function openWindow(windowId) {
+            const window = document.getElementById(windowId);
+            window.classList.remove('hidden');
+            window.style.zIndex = zIndex++;
+            
+            // 添加到任务栏
+            addToTaskbar(windowId);
+            
+            // 如果是终端，聚焦输入框
+            if (windowId === 'terminal') {
+                document.getElementById('terminal-input').focus();
+            }
+        }
+        
+        // 关闭窗口
+        function closeWindow(windowId) {
+            document.getElementById(windowId).classList.add('hidden');
+            removeFromTaskbar(windowId);
+        }
+        
+        // 最小化窗口
+        function minimizeWindow(windowId) {
+            document.getElementById(windowId).classList.add('hidden');
+        }
+        
+        // 添加到任务栏
+        function addToTaskbar(windowId) {
+            const taskbarItems = document.getElementById('taskbar-items');
+            
+            // 检查是否已存在
+            if (document.getElementById(`taskbar-${windowId}`)) {
+                return;
+            }
+            
+            const titles = {
+                'my-computer': '我的电脑',
+                'terminal': '命令提示符',
+                'notepad': '记事本',
+                'calculator': '计算器',
+                'paint': '画图'
+            };
+            
+            const item = document.createElement('div');
+            item.id = `taskbar-${windowId}`;
+            item.className = 'taskbar-item pixel-border';
+            item.innerHTML = `<i class="fa fa-window-maximize"></i><span>${titles[windowId]}</span>`;
+            item.onclick = () => {
+                const window = document.getElementById(windowId);
+                if (window.classList.contains('hidden')) {
+                    window.classList.remove('hidden');
+                }
+                window.style.zIndex = zIndex++;
+            };
+            
+            taskbarItems.appendChild(item);
+        }
+        
+        // 从任务栏移除
+        function removeFromTaskbar(windowId) {
+            const item = document.getElementById(`taskbar-${windowId}`);
+            if (item) {
+                item.remove();
+            }
+        }
+        
+        // 开始拖动窗口
+        function startDrag(e, windowId) {
+            e.preventDefault();
+            const window = document.getElementById(windowId);
+            activeWindow = windowId;
+            
+            // 设置为最上层
+            window.style.zIndex = zIndex++;
+            
+            // 计算偏移量
+            const rect = window.getBoundingClientRect();
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            // 添加事件监听
+            document.addEventListener('mousemove', dragWindow);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        // 拖动窗口
+        function dragWindow(e) {
+            if (activeWindow) {
+                const window = document.getElementById(activeWindow);
+                const x = e.clientX - dragOffset.x;
+                const y = e.clientY - dragOffset.y;
+                
+                // 限制在可视区域内
+                const maxX = window.parentElement.clientWidth - window.offsetWidth;
+                const maxY = window.parentElement.clientHeight - window.offsetHeight;
+                const constrainedX = Math.max(0, Math.min(x, maxX));
+                const constrainedY = Math.max(0, Math.min(y, maxY));
+                
+                window.style.left = `${constrainedX}px`;
+                window.style.top = `${constrainedY}px`;
+            }
+        }
+        
+        // 停止拖动
+        function stopDrag() {
+            activeWindow = null;
+            document.removeEventListener('mousemove', dragWindow);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+        
+        // 切换开始菜单
+        function toggleStartMenu() {
+            const startMenu = document.getElementById('start-menu');
+            startMenu.classList.toggle('hidden');
+        }
+        
+        // 点击桌面关闭开始菜单
+        document.getElementById('desktop').addEventListener('click', (e) => {
+            if (!e.target.closest('#start-button') && !e.target.closest('#start-menu')) {
+                document.getElementById('start-menu').classList.add('hidden');
+            }
+        });
+        
+        // 更新系统时间
+        function updateSystemTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('system-time').textContent = `${hours}:${minutes}`;
+        }
+        
+        // 初始化时间并定时更新
+        updateSystemTime();
+        setInterval(updateSystemTime, 60000);
+        
+        // 终端功能
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+        
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const command = terminalInput.value.trim();
+                handleTerminalCommand(command);
+                terminalInput.value = '';
+            }
+        });
+        
+        function handleTerminalCommand(command) {
+            let output = '';
+            
+            switch(command.toLowerCase()) {
+                case 'help':
+                    output = '可用命令:\n' +
+                             '  help    - 显示帮助信息\n' +
+                             '  dir     - 列出目录内容\n' +
+                             '  date    - 显示当前日期\n' +
+                             '  time    - 显示当前时间\n' +
+                             '  cls     - 清除屏幕\n' +
+                             '  about   - 显示系统信息';
+                    break;
+                case 'dir':
+                    output = '  程序\n' +
+                             '  文档\n' +
+                             '  图片\n' +
+                             '  音乐';
+                    break;
+                case 'date':
+                    const now = new Date();
+                    output = now.toLocaleDateString();
+                    break;
+                case 'time':
+                    const time = new Date();
+                    output = time.toLocaleTimeString();
+                    break;
+                case 'cls':
+                    terminalOutput.innerHTML = '8bit OS 命令提示符<br>C:\\> ';
+                    return;
+                case 'about':
+                    output = '8bit OS v1.0\n' +
+                             '复古风格操作系统模拟器\n' +
+                             '内存: 64KB\n' +
+                             '显卡: 8bit 图形适配器';
+                    break;
+                case '':
+                    output = '';
+                    break;
+                default:
+                    output = `'${command}' 不是内部或外部命令，也不是可运行的程序或批处理文件。`;
+            }
+            
+            // 添加命令和输出到终端
+            terminalOutput.innerHTML += command + '<br>';
+            if (output) {
+                terminalOutput.innerHTML += output + '<br>';
+            }
+            terminalOutput.innerHTML += 'C:\\> ';
+            
+            // 滚动到底部
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+        
+        // 计算器功能
+        let calcValue = '0';
+        let calcOperator = null;
+        let calcResetOnNextInput = false;
+        
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').textContent = calcValue;
+        }
+        
+        function calcNumber(num) {
+            if (calcResetOnNextInput) {
+                calcValue = '0';
+                calcResetOnNextInput = false;
+            }
+            
+            if (calcValue === '0') {
+                calcValue = String(num);
+            } else {
+                calcValue += String(num);
+            }
+            
+            updateCalcDisplay();
+        }
+        
+        function calcDot() {
+            if (calcResetOnNextInput) {
+                calcValue = '0';
+                calcResetOnNextInput = false;
+            }
+            
+            if (!calcValue.includes('.')) {
+                calcValue += '.';
+                updateCalcDisplay();
+            }
+        }
+        
+        function calcOperator(op) {
+            if (op === '+/-') {
+                calcValue = String(parseFloat(calcValue) * -1);
+                updateCalcDisplay();
+                return;
+            }
+            
+            if (op === '%') {
+                calcValue = String(parseFloat(calcValue) / 100);
+                updateCalcDisplay();
+                return;
+            }
+            
+            // 普通运算符
+            if (calcOperator && !calcResetOnNextInput) {
+                // 计算当前结果
+                calcEquals();
+            }
+            
+            calcOperator = op;
+            calcResetOnNextInput = true;
+        }
+        
+        function calcEquals() {
+            if (!calcOperator) return;
+            
+            const currentValue = parseFloat(calcValue);
+            const result = 0; // 这里简化处理，实际应该保存前一个值并计算
+            
+            // 简单模拟计算结果
+            switch(calcOperator) {
+                case '+':
+                    calcValue = String(currentValue + Math.floor(Math.random() * 10));
+                    break;
+                case '-':
+                    calcValue = String(Math.max(0, currentValue - Math.floor(Math.random() * 5)));
+                    break;
+                case '*':
+                    calcValue = String(currentValue * Math.floor(Math.random() * 3 + 1));
+                    break;
+                case '/':
+                    const divisor = Math.floor(Math.random() * 5) + 1;
+                    calcValue = String((currentValue / divisor).toFixed(2));
+                    break;
+            }
+            
+            calcOperator = null;
+            calcResetOnNextInput = true;
+            updateCalcDisplay();
+        }
+        
+        function calcClear() {
+            calcValue = '0';
+            calcOperator = null;
+            calcResetOnNextInput = false;
+            updateCalcDisplay();
+        }
+        
+        // 画图功能
+        let drawColor = 'black';
+        let drawTool = 'pen';
+        let isDrawing = false;
+        let lastPoint = null;
+        
+        function setDrawColor(color) {
+            drawColor = color;
+        }
+        
+        function setDrawTool(tool) {
+            drawTool = tool;
+        }
+        
+        function clearCanvas() {
+            const canvas = document.getElementById('paint-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // 初始化画布
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('paint-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置初始背景为白色
+            clearCanvas();
+            
+            // 鼠标事件
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                lastPoint = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+                
+                // 如果是铅笔工具，直接画点
+                if (drawTool === 'pen') {
+                    ctx.fillStyle = drawColor;
+                    ctx.fillRect(lastPoint.x, lastPoint.y, 2, 2);
+                }
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const currentPoint = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+                
+                ctx.strokeStyle = drawColor;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                
+                ctx.beginPath();
+                
+                if (drawTool === 'pen' || drawTool === 'line') {
+                    ctx.moveTo(lastPoint.x, lastPoint.y);
+                    ctx.lineTo(currentPoint.x, currentPoint.y);
+                    ctx.stroke();
+                }
+                
+                // 更新最后一个点
+                if (drawTool === 'pen') {
+                    lastPoint = currentPoint;
+                }
+            });
+            
+            canvas.addEventListener('mouseup', () => {
+                isDrawing = false;
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                isDrawing = false;
+            });
+        });
+    </script>
+</body>
+</html>
