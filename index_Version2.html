@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>王子铭的自我介绍</title>
+  <meta name="description" content="王子铭 - 前端开发者 | 自我介绍网页" />
+  <style>
+    /* 合并样式（来自 styles.css） */
+    :root{
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #6b7280;
+      --accent: linear-gradient(90deg,#4f46e5,#06b6d4);
+      --btn-bg: #4f46e5;
+      --btn-color: #fff;
+      --radius: 12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.6;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .container{
+      max-width:1000px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .site-header{
+      background:var(--accent);
+      color:#fff;
+      padding:36px 0;
+      border-bottom-left-radius: var(--radius);
+      border-bottom-right-radius: var(--radius);
+      margin-bottom:20px;
+    }
+    .header-inner{
+      display:flex;
+      gap:20px;
+      align-items:center;
+    }
+    .avatar{width:120px;flex:0 0 120px}
+    .avatar-svg{width:100%;height:auto;border-radius:12px;display:block}
+    .intro h1{margin:0 0 8px 0;font-size:28px}
+    .lead{margin:0 0 10px 0;opacity:0.95}
+    .meta{margin:8px 0;color:rgba(255,255,255,0.85)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn{
+      background:var(--btn-bg);
+      color:var(--btn-color);
+      padding:10px 14px;
+      border-radius:8px;
+      text-decoration:none;
+      display:inline-block;
+      font-weight:600;
+      border: none;
+      cursor: pointer;
+    }
+    .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.2)}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.35);color:#fff}
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:0 4px 20px rgba(2,6,23,0.06);
+      margin-bottom:16px;
+    }
+    .skills-grid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .skill-bar{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden;margin-top:8px}
+    .skill-bar span{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#06b6d4)}
+    .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .project{padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid #eef2ff}
+    .project h3{margin:0 0 6px 0}
+    .muted{color:var(--muted);font-size:14px}
+    .timeline{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+    .timeline li{padding:10px;border-left:3px solid #eef2ff;margin-left:6px}
+    .contact-form{display:grid;gap:8px;max-width:600px}
+    .contact-form label{display:block;font-weight:600}
+    .contact-form input, .contact-form textarea{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef8;background:#fff
+    }
+    .site-footer{padding:20px 0;text-align:center;color:var(--muted)}
+    body.dark{
+      --bg:#0b1220;
+      --card:#071021;
+      --text:#e6eef8;
+      --muted:#9aa7bf;
+      --btn-bg:#06b6d4;
+    }
+    @media (max-width:720px){
+      .header-inner{flex-direction:column;align-items:flex-start}
+      .avatar{width:96px;flex:0 0 96px}
+    }
+
+    /* 小调整：让链接按钮看起来像链接 */
+    a.link { color: var(--btn-bg); text-decoration: none; font-weight:600; }
+  </style>
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <div class="avatar" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="avatar-svg" role="img" aria-label="头像占位">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1">
+              <stop offset="0" stop-color="#4f46e5"/>
+              <stop offset="1" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="20" fill="url(#g)"/>
+          <text x="50" y="58" font-size="40" fill="#fff" text-anchor="middle" font-family="sans-serif">WZ</text>
+        </svg>
+      </div>
+
+      <div class="intro">
+        <h1>你好，我是 王子铭</h1>
+        <p class="lead">前端工程师 / 编程 爱好者 / 喜欢把复杂的界面简化成优雅的UI</p>
+
+        <p class="meta">
+          居住地：无锡 · 邮箱：<a href="mailto:wangziming201510132412@outlook.com">wangziming201510132412@outlook.com</a>
+        </p>
+
+        <div class="actions">
+          <a class="btn" href="#projects">查看项目</a>
+          <a class="btn outline" href="#contact">联系我：QQ 3867673887</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="main" role="main">
+    <section id="about" class="card">
+      <h2>关于我</h2>
+      <p>
+        我是一名专注于 Web 前端开发的小学生，拥有的前端项目经验，熟悉现代前端框架。
+        我热衷于做可访问、可维护并有良好用户体验的界面。平时喜欢阅读文章，并实践在项目中。
+      </p>
+      <p>
+        我的工作风格：注重沟通、喜欢测试、重视过程
+      </p>
+    </section>
+
+      <h2>联系我</h2>
+      <p>如果你想合作，欢迎通过下面方式联系我：</p>
+      <ul>
+        <li>邮箱：<a href="mailto:wangziming201510132412@outlook.com">wangziming201510132412@outlook.com</a></li>
+        <li>GitHub：<a href="https://github.com/WangZiming-dev" target="_blank" rel="noopener">github.com/WangZiming-dev</a></li>
+      </ul>
+
+      <form id="contactForm" class="contact-form" onsubmit="return false;" aria-label="联系表单">
+        <label>
+          姓名
+          <input type="text" name="name" required placeholder="你的姓名" />
+        </label>
+        <label>
+          邮箱
+          <input type="email" name="email" required placeholder="your@email.com" />
+        </label>
+        <label>
+          内容
+          <textarea name="message" rows="4" required placeholder="请简要说明来意"></textarea>
+        </label>
+        <button class="btn" id="sendBtn" type="button">发送（目前未联网）</button>
+        <p id="formMsg" class="muted" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <p>© 2025 王子明 · 设计与实现：简洁、可访问、响应式</p>
+      <button id="themeToggle" class="btn" aria-pressed="false" title="切换深色/浅色主题">切换主题</button>
+    </div>
+  </footer>
+
+  <script>
+    // 合并脚本（来自 script.js）
+    (function(){
+      const form = document.getElementById('contactForm');
+      const sendBtn = document.getElementById('sendBtn');
+      const formMsg = document.getElementById('formMsg');
+
+      if (form && sendBtn) {
+        sendBtn.addEventListener('click', function(){
+          const name = form.elements['name'].value.trim();
+          const email = form.elements['email'].value.trim();
+          const message = form.elements['message'].value.trim();
+
+          if (!name || !email || !message) {
+            formMsg.textContent = '请填写所有字段后再发送。';
+            return;
+          }
+
+          formMsg.textContent = '已准备好发送（本示例不连接服务器）。感谢您的联系，' + name + '！';
+          form.reset();
+        });
+      }
+
+      const themeToggle = document.getElementById('themeToggle');
+      function setTheme(dark){
+        if (dark) {
+          document.body.classList.add('dark');
+          themeToggle.setAttribute('aria-pressed','true');
+        } else {
+          document.body.classList.remove('dark');
+          themeToggle.setAttribute('aria-pressed','false');
+        }
+        try { localStorage.setItem('prefers-dark', dark ? '1' : '0'); } catch(e){}
+      }
+      try {
+        const pref = localStorage.getItem('prefers-dark');
+        if (pref === '1') setTheme(true);
+      } catch(e){}
+
+      if (themeToggle){
+        themeToggle.addEventListener('click', function(){
+          setTheme(!document.body.classList.contains('dark'));
+        });
+      }
+
+      document.addEventListener('click', function(e){
+        const a = e.target.closest('a[href^="#"]');
+        if (!a) return;
+        const hash = a.getAttribute('href');
+        if (hash === '#' || hash === '') return;
+        const target = document.querySelector(hash);
+        if (target){
+          e.preventDefault();
+          target.scrollIntoView({behavior:'smooth', block:'start'});
+        }
+      });
+    })();
+  </script>
+
+  <!--
+    README 信息（供参考）：
+
+    这是一个简洁的个人自我介绍网页模板，包含头部简介、关于我、技能、项目、工作经历、联系表单、主题切换与响应式支持。
+    使用方式：直接保存为 index.html 并打开；替换姓名、联系方式、项目详情或将 SVG 头像替换为 <img>。
+  -->
+</body>
+</html>
